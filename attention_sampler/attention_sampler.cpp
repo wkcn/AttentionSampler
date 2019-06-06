@@ -1,8 +1,8 @@
 template <typename T>
-MOBULA_KERNEL cumsum(T* X, T* I, const int N, const int att_size) {
-    parfor(N, [&](int i) {
-        T* Xi = X + i * att_size;
-        T* Ii = I + i * att_size;
+MOBULA_KERNEL cumsum_kernel(const int N, const T* X, T* I, const int att_size) {
+    parfor(N, [&](int b) {
+        const T* Xi = X + b * att_size;
+        T* Ii = I + b * att_size;
         for (int i = 1; i < att_size; ++i) {
             Ii[i] = Ii[i - 1] + Xi[i];
         }
@@ -10,12 +10,13 @@ MOBULA_KERNEL cumsum(T* X, T* I, const int N, const int att_size) {
 }
 
 template <typename T>
-MOBULA_KERNEL map_step(T* attxi, T* index_x, const int N, const float stepx, const float att_size, const int out_size) {
-    T* myscale = 2.0 / (att_size - 1);
+MOBULA_KERNEL map_step_kernel(const int N, const T* attxi, T* index_x, const T* stepxs, const int att_size, const int out_size) {
+    T myscale = T(2) / (att_size - 1);
     parfor(N, [&](int b) {
         int i = 0;
         int j = 0;
-        T* mapxi = attxi + b * att_size;
+        const T* mapxi = attxi + b * att_size;
+        const T stepx = stepxs[b];
         T* index_i = index_x + b * att_size;
         while (i < out_size)
         {
