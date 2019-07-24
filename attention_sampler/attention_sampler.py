@@ -46,7 +46,7 @@ class AttSampler:
             index_x.reshape((N, 1, out_size)).tile((1, out_size, 1)),
             index_y.tile((1, 1, out_size)), axis=1)
 
-        if mx.autograd.is_training:
+        if mx.autograd.is_training():
             data.attach_grad()
             with mx.autograd.record():
                 out = self.F.BilinearSampler(data, grid)
