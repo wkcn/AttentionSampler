@@ -51,13 +51,12 @@ class AttSampler:
             with mx.autograd.record():
                 out = self.F.BilinearSampler(data, grid)
                 out.backward()
-                self.data = data
             return out
         else:
             return self.F.BilinearSampler(data, grid)
 
     def backward(self, dy):
-        return [self.data.grad, 0, 0]
+        return [self.x.grad, 0, 0]
     def infer_shape(self, in_shape):
         dshape = in_shape[0]
         out_size = int(dshape[2] * self.scale)
