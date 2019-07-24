@@ -37,7 +37,7 @@ git clone https://github.com/wkcn/AttentionSampler
 ```
 The directory shows as follow:
 ```bash
-AttentionSampler
+├─AttentionSampler
 │   ├── attention_sampler
 │   ├── imgs
 │   └── test.py
