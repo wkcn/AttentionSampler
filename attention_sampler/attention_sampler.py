@@ -1,4 +1,5 @@
 import mobula
+import mxnet as mx
 
 @mobula.op.register
 class AttSampler:
@@ -44,10 +45,19 @@ class AttSampler:
         grid = self.F.stack(
             index_x.reshape((N, 1, out_size)).tile((1, out_size, 1)),
             index_y.tile((1, 1, out_size)), axis=1)
-        return self.F.BilinearSampler(data, grid)
+
+        if mx.autograd.is_training:
+            data.attach_grad()
+            with mx.autograd.record():
+                out = self.F.BilinearSampler(data, grid)
+                out.backward()
+                self.data = data
+            return out
+        else:
+            return self.F.BilinearSampler(data, grid)
 
     def backward(self, dy):
-        return [0, 0, 0]
+        return [self.data.grad, 0, 0]
     def infer_shape(self, in_shape):
         dshape = in_shape[0]
         out_size = int(dshape[2] * self.scale)
