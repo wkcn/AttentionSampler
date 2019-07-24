@@ -1,4 +1,4 @@
-# Attention-based Sampler in TASN
+# Attention-based Sampler in TASN (Trilinear Attention Sampling Network)
 
 It is an implemetation of attention-based sampler in TASN. 
 
