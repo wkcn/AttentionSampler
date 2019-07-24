@@ -67,3 +67,16 @@ You can train TASN model now. Enjoy it!
 If this project is helpful, Hope to follow [me](https://github.com/wkcn) and star [the MobulaOP project](https://github.com/wkcn/mobulaop).
 
 Thank you!
+
+
+Reference Paper
+---------------
+```
+@inproceedings{zheng2019looking,
+  title={Looking for the Devil in the Details: Learning Trilinear Attention Sampling Network for Fine-grained Image Recognition},
+  author={Zheng, Heliang and Fu, Jianlong and Zha, Zheng-Jun and Luo, Jiebo},
+  booktitle={Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition},
+  pages={5012--5021},
+  year={2019}
+}
+```
