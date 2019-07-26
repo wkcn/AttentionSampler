@@ -1,12 +1,14 @@
 import mobula
 import mxnet as mx
 
+
 @mobula.op.register
 class AttSampler:
     def __init__(self, scale=1.0, dense=4, iters=5):
         self.scale = scale
         self.dense = dense
         self.iters = iters
+
     def forward(self, data, attx, atty):
         # attx: (N, W, 1)
         # atty: (N, H, 1)
@@ -17,16 +19,17 @@ class AttSampler:
         attx = attx * out_size
         atty = atty * out_size
         for j in range(self.iters):
-            max_attx = attx.max(1, keepdims=True) # (N, 1, 1)
-            max_atty = atty.max(1, keepdims=True) # (N, 1, 1)
+            max_attx = attx.max(1, keepdims=True)  # (N, 1, 1)
+            max_atty = atty.max(1, keepdims=True)  # (N, 1, 1)
             if j == 0:
-                threshold = self.F.minimum(self.F.minimum(max_attx, max_atty), threshold) # (N, 1, 1)
+                threshold = self.F.minimum(self.F.minimum(
+                    max_attx, max_atty), threshold)  # (N, 1, 1)
             else:
                 threshold = self.F.minimum(max_attx, max_atty)
             self.F.broadcast_minimum(threshold, attx, out=attx)
             self.F.broadcast_minimum(threshold, atty, out=atty)
-            sum_x = attx.sum(1, keepdims=True) # (N, 1, 1)
-            sum_y = atty.sum(1, keepdims=True) # (N, 1, 1)
+            sum_x = attx.sum(1, keepdims=True)  # (N, 1, 1)
+            sum_y = atty.sum(1, keepdims=True)  # (N, 1, 1)
             deltax = (out_size - sum_x) / att_size
             deltay = (out_size - sum_y) / att_size
             # compensate the drop value
@@ -58,6 +61,7 @@ class AttSampler:
     def backward(self, dy):
         self.out.backward(dy)
         return [self.x.grad, 0, 0]
+
     def infer_shape(self, in_shape):
         dshape = in_shape[0]
         out_size = int(dshape[2] * self.scale)
