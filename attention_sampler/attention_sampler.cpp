@@ -17,7 +17,7 @@ MOBULA_KERNEL map_step_kernel(const int N, const T* attxi, T* index_x, const T* 
         int j = 0;
         const T* mapxi = attxi + b * att_size;
         const T stepx = stepxs[b];
-        T* index_i = index_x + b * att_size;
+        T* index_i = index_x + b * out_size;
         while (i < out_size)
         {
             if (mapxi[j] >= i*stepx)
