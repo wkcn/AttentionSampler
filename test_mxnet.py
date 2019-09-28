@@ -40,8 +40,7 @@ if not hasattr(mx.nd, 'AttSampler'):
 print("Test consistence")
 
 for _ in range(100):
-    data_pred = AttSampler(
-        data=data, attx=map_sx, atty=map_sy, scale=0.4375, dense=4)
+    data_pred = AttSampler(scale=0.4375, dense=4)(data, map_sx, map_sy)
     data_gt = mx.nd.AttSampler(
         data=data, attx=map_sx, atty=map_sy, scale=0.4375, dense=4)
     mx.nd.waitall()
@@ -50,8 +49,7 @@ T = 1000
 while 1:
     tic = time.time()
     for _ in range(T):
-        data_pred = AttSampler(
-            data=data, attx=map_sx, atty=map_sy, scale=0.4375, dense=4)
+        data_pred = AttSampler(scale=0.4375, dense=4)(data, map_sx, map_sy)
         data_pred.wait_to_read()
     print("PRED", time.time() - tic)
 
