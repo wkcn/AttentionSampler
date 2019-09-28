@@ -9,6 +9,7 @@ class AttSamplerGrid:
         self.iters = iters
 
     def forward(self, data, attx, atty):
+        F = self.F._mobula_hack
         # attx: (N, W, 1)
         # atty: (N, H, 1)
         N, _, in_size, _ = data.shape
@@ -18,17 +19,17 @@ class AttSamplerGrid:
         attx = attx * out_size
         atty = atty * out_size
         for j in range(self.iters):
-            max_attx = attx.max(1, keepdims=True)  # (N, 1, 1)
-            max_atty = atty.max(1, keepdims=True)  # (N, 1, 1)
+            max_attx = F.max(attx, 1, keepdims=True)  # (N, 1, 1)
+            max_atty = F.max(atty, 1, keepdims=True)  # (N, 1, 1)
             if j == 0:
-                threshold = self.F.minimum(self.F.minimum(
-                    max_attx, max_atty), threshold)  # (N, 1, 1)
+                threshold = F.minimum(F.minimum(
+                    max_attx, max_atty) , threshold)  # (N, 1, 1)
             else:
-                threshold = self.F.minimum(max_attx, max_atty)
-            self.F.broadcast_minimum(threshold, attx, out=attx)
-            self.F.broadcast_minimum(threshold, atty, out=atty)
-            sum_x = attx.sum(1, keepdims=True)  # (N, 1, 1)
-            sum_y = atty.sum(1, keepdims=True)  # (N, 1, 1)
+                threshold = F.minimum(max_attx, max_atty)
+            F.broadcast_minimum(threshold, attx, out=attx)
+            F.broadcast_minimum(threshold, atty, out=atty)
+            sum_x = F.sum(attx, 1, keepdims=True)  # (N, 1, 1)
+            sum_y = F.sum(atty, 1, keepdims=True)  # (N, 1, 1)
             deltax = (out_size - sum_x) / att_size
             deltay = (out_size - sum_y) / att_size
             # compensate the drop value
@@ -40,24 +41,23 @@ class AttSamplerGrid:
         '''
         attx[:, 0] = 1
         atty[:, 0] = 1
-        attxi = self.F.cumsum(attx, 1)
-        attyi = self.F.cumsum(atty, 1)
+        attxi = F.cumsum(attx, 1)
+        attyi = F.cumsum(atty, 1)
         stepx = attxi[:, -1] / out_size
         stepy = attyi[:, -1] / out_size
-        index_x = self.F.empty((N, out_size, 1))
-        index_y = self.F.empty((N, out_size, 1))
+        index_x = F.empty((N, out_size, 1))
+        index_y = F.empty((N, out_size, 1))
         # note: x and y are inverse.
         mobula.func.map_step(N, attxi, index_y, stepx, att_size, out_size)
         mobula.func.map_step(N, attyi, index_x, stepy, att_size, out_size)
-        grid = self.F.stack(
-            index_x.reshape((N, 1, out_size)).tile((1, out_size, 1)),
-            index_y.tile((1, 1, out_size)), axis=1)
-        return grid
+        return F.tile(F.reshape(index_x, (N, 1, out_size)), (1, out_size, 1)),\
+            F.tile(index_y, (1, 1, out_size))
 
-    def backward(self, dy):
+    def backward(self, dy_x, dy_y):
         return [0, 0, 0]
 
     def infer_shape(self, in_shape):
         dshape = in_shape[0]
         out_size = int(dshape[2] * self.scale)
-        return in_shape, [(dshape[0], 2, out_size, out_size)]
+        oshape = (dshape[0], out_size, out_size)
+        return in_shape, [oshape, oshape]

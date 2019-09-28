@@ -18,10 +18,10 @@ map_s = mx.nd.array(map_s, ctx=ctx)
 data = mx.nd.array(data, ctx=ctx)
 map_sx = mx.nd.expand_dims(mx.nd.max(map_s, axis=2), axis=-1)
 map_sy = mx.nd.expand_dims(mx.nd.max(map_s, axis=1), axis=-1)
-sum_sx = mx.nd.sum(map_sx, axis=(1, 2))
-sum_sy = mx.nd.sum(map_sy, axis=(1, 2))
-map_sx = mx.nd.broadcast_div(map_sx, mx.nd.reshape(sum_sx, (0, 1, 1)))
-map_sy = mx.nd.broadcast_div(map_sy, mx.nd.reshape(sum_sy, (0, 1, 1)))
+sum_sx = mx.nd.sum(map_sx, axis=(1, 2), keepdims=True)
+sum_sy = mx.nd.sum(map_sy, axis=(1, 2), keepdims=True)
+map_sx /= sum_sx
+map_sy /= sum_sy
 
 mx.nd.waitall()
 
@@ -29,7 +29,7 @@ mx.nd.waitall()
 data.attach_grad()
 with mx.autograd.record():
     data_pred = AttSampler(scale=0.4375, dense=4)(data, map_sx, map_sy)
-    data_pred.backward()
+    data_pred.sum().backward()
 mx.nd.waitall()
 print(data_pred.max(), data_pred.min())
 print(data.grad.max(), data.grad.min())

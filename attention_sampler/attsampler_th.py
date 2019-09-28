@@ -1,22 +1,24 @@
 import mobula
-import mxnet as mx
+import torch
+import torch.nn.functional as F
+from . import mobula_hack_for_pytorch
+
 
 # Hack MobulaOP for the compatible functions
-mx.nd._mobula_hack = mx.nd
-mx.sym._mobula_hack = mx.sym
+torch._mobula_hack = mobula_hack_for_pytorch
 
 
-class AttSampler(mx.gluon.HybridBlock):
+class AttSampler(torch.nn.Module):
     def __init__(self, scale=1.0, dense=4, iters=5):
         super(AttSampler, self).__init__()
         self.scale = scale
         self.dense = dense
         self.iters = iters
 
-    def hybrid_forward(self, F, data, attx, atty):
+    def forward(self, data, attx, atty):
         grid = mobula.op.AttSamplerGrid(data, attx, atty,
                                         scale=self.scale,
                                         dense=self.dense,
                                         iters=self.iters)
-        grid = F.stack(*grid, axis=1)
-        return F.BilinearSampler(data, grid)
+        grid = torch.stack(grid, dim=3)
+        return F.grid_sample(data, grid)
