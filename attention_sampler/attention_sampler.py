@@ -1,9 +1,8 @@
 import mobula
-import mxnet as mx
 
 
 @mobula.op.register
-class AttSampler:
+class AttSamplerGrid:
     def __init__(self, scale=1.0, dense=4, iters=5):
         self.scale = scale
         self.dense = dense
@@ -35,34 +34,30 @@ class AttSampler:
             # compensate the drop value
             attx += deltax
             atty += deltay
-        attxi = self.F.ones((N, att_size, 1))
-        attyi = self.F.ones((N, att_size, 1))
-        mobula.func.cumsum(N, attx, attxi, att_size)
-        mobula.func.cumsum(N, atty, attyi, att_size)
+        '''
+        it is the same as the original implemenation.
+        the first element is 1.
+        '''
+        attx[:, 0] = 1
+        atty[:, 0] = 1
+        attxi = self.F.cumsum(attx, 1)
+        attyi = self.F.cumsum(atty, 1)
         stepx = attxi[:, -1] / out_size
         stepy = attyi[:, -1] / out_size
         index_x = self.F.empty((N, out_size, 1))
         index_y = self.F.empty((N, out_size, 1))
+        # note: x and y are inverse.
         mobula.func.map_step(N, attxi, index_y, stepx, att_size, out_size)
         mobula.func.map_step(N, attyi, index_x, stepy, att_size, out_size)
         grid = self.F.stack(
             index_x.reshape((N, 1, out_size)).tile((1, out_size, 1)),
             index_y.tile((1, 1, out_size)), axis=1)
-
-        if mx.autograd.is_training():
-            data.attach_grad()
-            with mx.autograd.record():
-                out = self.F.BilinearSampler(data, grid)
-                self.out = out
-            return out
-        else:
-            return self.F.BilinearSampler(data, grid)
+        return grid
 
     def backward(self, dy):
-        self.out.backward(dy)
-        return [self.x.grad, 0, 0]
+        return [0, 0, 0]
 
     def infer_shape(self, in_shape):
         dshape = in_shape[0]
         out_size = int(dshape[2] * self.scale)
-        return in_shape, [(dshape[0], dshape[1], out_size, out_size)]
+        return in_shape, [(dshape[0], 2, out_size, out_size)]

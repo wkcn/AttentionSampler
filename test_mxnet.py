@@ -4,7 +4,10 @@ import mxnet as mx
 import cv2
 import mobula
 import time
+from attention_sampler.attsampler_mx import AttSampler
 mobula.op.load('attention_sampler')
+
+tic = time.time()
 
 data = cv2.resize(cv2.imread('imgs/01.jpg'), (224, 224)
                   )[:, :, 0].reshape((1, 1, 224, 224))
@@ -25,18 +28,19 @@ mx.nd.waitall()
 
 data.attach_grad()
 with mx.autograd.record():
-    data_pred = mobula.op.AttSampler(
-        data=data, attx=map_sx, atty=map_sy, scale=0.4375, dense=4)
+    data_pred = AttSampler(scale=0.4375, dense=4)(data, map_sx, map_sy)
     data_pred.backward()
 mx.nd.waitall()
+print(data_pred.max(), data_pred.min())
 print(data.grad.max(), data.grad.min())
 print("Okay")
 if not hasattr(mx.nd, 'AttSampler'):
+    print("TIME", time.time() - tic)
     sys.exit(0)
 print("Test consistence")
 
 for _ in range(100):
-    data_pred = mobula.op.AttSampler(
+    data_pred = AttSampler(
         data=data, attx=map_sx, atty=map_sy, scale=0.4375, dense=4)
     data_gt = mx.nd.AttSampler(
         data=data, attx=map_sx, atty=map_sy, scale=0.4375, dense=4)
@@ -46,7 +50,7 @@ T = 1000
 while 1:
     tic = time.time()
     for _ in range(T):
-        data_pred = mobula.op.AttSampler(
+        data_pred = AttSampler(
             data=data, attx=map_sx, atty=map_sy, scale=0.4375, dense=4)
         data_pred.wait_to_read()
     print("PRED", time.time() - tic)
