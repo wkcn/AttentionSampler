@@ -45,8 +45,9 @@ class AttSamplerGrid:
         attyi = F.cumsum(atty, 1)
         stepx = attxi[:, -1] / out_size
         stepy = attyi[:, -1] / out_size
-        index_x = F.empty((N, out_size, 1))
-        index_y = F.empty((N, out_size, 1))
+        ctx = F.get_ctx(stepx)
+        index_x = F.empty((N, out_size, 1), ctx=ctx)
+        index_y = F.empty((N, out_size, 1), ctx=ctx)
         # note: x and y are inverse.
         mobula.func.map_step(N, attxi, index_y, stepx, att_size, out_size)
         mobula.func.map_step(N, attyi, index_x, stepy, att_size, out_size)

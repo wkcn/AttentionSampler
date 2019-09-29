@@ -26,7 +26,11 @@ def minimum(lhs, rhs, out=None):
 broadcast_minimum = minimum
 
 cumsum = torch.cumsum
-empty = torch.empty
+def empty(shape, ctx=None):
+    return torch.empty(shape, device=ctx)
+
+def get_ctx(data):
+    return data.device
 
 
 def tile(data, reps):
