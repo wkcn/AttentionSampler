@@ -56,10 +56,8 @@ The directory shows as follow:
 ```python
 import mxnet as mx
 import mobula
+from attention_sampler import attsampler_mx
 mobula.op.load('./AttentionSampler/attention_sampler')
-
-mx.sym.contrib.AttSampler = mobula.op.AttSampler
-mx.nd.contrib.AttSampler = mobula.op.AttSampler
 ```
 
 You can train TASN model now. Enjoy it!

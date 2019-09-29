@@ -19,3 +19,13 @@ class AttSampler(mx.gluon.HybridBlock):
                                         iters=self.iters)
         grid = F.stack(*grid, axis=1)
         return F.BilinearSampler(data, grid)
+
+
+def AttSamplerWrapper(data, attx, atty, scale=1.0, dense=4, iters=5):
+    return AttSampler(scale=scale, dense=dense, iters=iters)(data, attx, atty)
+
+
+mx.nd.AttSampler = AttSamplerWrapper
+mx.nd.contrib.AttSampler = AttSamplerWrapper
+mx.sym.AttSampler = AttSamplerWrapper
+mx.sym.contrib.AttSampler = AttSamplerWrapper
