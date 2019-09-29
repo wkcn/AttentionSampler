@@ -23,7 +23,7 @@ class AttSamplerGrid:
             max_atty = F.max(atty, 1, keepdims=True)  # (N, 1, 1)
             if j == 0:
                 threshold = F.minimum(F.minimum(
-                    max_attx, max_atty) , threshold)  # (N, 1, 1)
+                    max_attx, max_atty), threshold)  # (N, 1, 1)
             else:
                 threshold = F.minimum(max_attx, max_atty)
             F.broadcast_minimum(threshold, attx, out=attx)

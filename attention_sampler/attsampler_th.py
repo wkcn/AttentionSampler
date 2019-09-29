@@ -16,7 +16,9 @@ class AttSampler(torch.nn.Module):
         self.iters = iters
 
     def forward(self, data, attx, atty):
-        grid = mobula.op.AttSamplerGrid(data, attx, atty,
+        grid = mobula.op.AttSamplerGrid(data.detach(),
+                                        attx.detach(),
+                                        atty.detach(),
                                         scale=self.scale,
                                         dense=self.dense,
                                         iters=self.iters)

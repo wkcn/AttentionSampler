@@ -17,18 +17,21 @@ def sum(data, axis=None, keepdims=None):
 def minimum(lhs, rhs, out=None):
     assert isinstance(lhs, torch.Tensor)
     if isinstance(rhs, torch.Tensor):
-        return torch.min(lhs, rhs, out=None)[0]
+        return torch.min(lhs, rhs, out=out)
     if out is None:
         return lhs.clamp_max(rhs)
     return lhs.clamp(max=rhs, out=out)
+
 
 broadcast_minimum = minimum
 
 cumsum = torch.cumsum
 empty = torch.empty
 
+
 def tile(data, reps):
     return data.repeat(reps)
+
 
 def reshape(data, shape):
     return data.view(shape)

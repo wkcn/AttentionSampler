@@ -3,7 +3,6 @@ import mxnet as mx
 
 # Hack MobulaOP for the compatible functions
 mx.nd._mobula_hack = mx.nd
-mx.sym._mobula_hack = mx.sym
 
 
 class AttSampler(mx.gluon.HybridBlock):
