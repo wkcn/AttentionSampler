@@ -62,7 +62,7 @@ Thank you!
 
 Training Log
 ------------
-[Log](./training_tasn.log)
+[Log (default setting)](./training_tasn.log)
 
 
 Reference Paper
