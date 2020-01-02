@@ -66,6 +66,10 @@ If this project is helpful, Hope to follow [me](https://github.com/wkcn) and sta
 
 Thank you!
 
+Training Log
+------------
+[Log](./training_tasn.log)
+
 
 Reference Paper
 ---------------
