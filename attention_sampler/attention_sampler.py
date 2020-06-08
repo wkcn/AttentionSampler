@@ -41,8 +41,16 @@ class AttSamplerGrid:
         '''
         attx[:, 0] = 1
         atty[:, 0] = 1
-        attxi = F.cumsum(attx, 1)
-        attyi = F.cumsum(atty, 1)
+        if hasattr(F, 'cumsum'):
+            attxi = F.cumsum(attx, 1)
+            attyi = F.cumsum(atty, 1)
+        else:
+            attxi = self.F.empty((N, att_size, 1))
+            attyi = self.F.empty((N, att_size, 1))
+            attxi[:, 0] = 1
+            attyi[:, 0] = 1
+            mobula.func.cumsum(N, attx, attxi, att_size)
+            mobula.func.cumsum(N, atty, attyi, att_size)
         stepx = attxi[:, -1] / out_size
         stepy = attyi[:, -1] / out_size
         ctx = F.get_ctx(stepx)
